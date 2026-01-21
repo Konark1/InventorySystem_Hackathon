@@ -18,18 +18,18 @@
     "id": 1,
     "name": "Laptop",
     "quantity": 10,
-    "lowStockThreshold": 5,
-    "isLowStock": false
+    "lowStockThreshold": 5
   },
   {
     "id": 2,
     "name": "Mouse",
     "quantity": 3,
-    "lowStockThreshold": 5,
-    "isLowStock": true
+    "lowStockThreshold": 5
   }
 ]
 ```
+
+> **Note:** The `isLowStock` status can be determined on the client side by checking if `quantity <= lowStockThreshold`
 
 ### 2. Add New Item
 - **Method:** `POST`
@@ -94,6 +94,8 @@
 - `quantity`: Current stock quantity
 - `lowStockThreshold`: Minimum stock level before alert
 
+> **Note:** The model includes an `IsLowStock()` method (not serialized in JSON) that returns `true` when `quantity <= lowStockThreshold`. The frontend should implement this logic for UI indicators.
+
 ---
 
 ## 🔴 Error Responses
@@ -147,4 +149,5 @@ curl -X POST "https://inventorysystemhackathon-production.up.railway.app/api/inv
 - All endpoints return JSON responses
 - No authentication required (for demo purposes)
 - Stock quantity cannot go below 0 (automatically set to 0 if negative)
-- `isLowStock` is calculated dynamically when `quantity <= lowStockThreshold`
+- Low stock status should be calculated on the client side: `quantity <= lowStockThreshold`
+- The API does not include `isLowStock` in responses; implement this logic in your frontend

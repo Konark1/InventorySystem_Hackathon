@@ -8,8 +8,8 @@ A full-stack inventory tracking solution built with **Angular 21** and **.NET 8 
 ## 🏆 Deliverables Checklist
 
 ### 1. 🎨 Design
-* **Wireframes:** [View Low-Fidelity Wireframe](./design/wireframe.png) *(Pending Upload)*
-* **UX Flow:** [View UX Flow Diagram](./design/ux_flow.png) *(Pending Upload)*
+* **Figma Design:** [View Figma Design](./design/FIGMA%20DESIGN.png)
+* **Flow Diagram:** [View Flow Diagram](./design/FLOW%20DIAGRAM.png)
 
 ### 2. 🚀 Prototype (Live Links)
 * **Frontend (Netlify):** [https://gregarious-empanada-1304aa.netlify.app/](https://gregarious-empanada-1304aa.netlify.app/)
@@ -21,7 +21,8 @@ A full-stack inventory tracking solution built with **Angular 21** and **.NET 8 
 * **Assumptions:** [View Assumptions](./docs/assumptions.md)
 
 ### 4. ✅ Testing
-* **Test Report:** [View Unit Test Evidence](./tests/test_execution.png) *(Pending Upload)*
+* **Backend Tests:** [View Backend XUnit Tests](./tests/xunit%20test%20backend.png)
+* **Full Stack Tests:** [View Full Stack Tests](./tests/xunit%20test%20fullstack.png)
 
 ---
 
@@ -121,27 +122,65 @@ docker run -p 8080:8080 inventory-system
 
 ---
 
-## 🔗 Repository
+## � Deployment
+
+### Backend (Railway)
+The backend API is deployed on Railway using Docker:
+1. Connected GitHub repository to Railway
+2. Railway automatically detects Dockerfile and builds the container
+3. Set environment variable: `ASPNETCORE_URLS=http://+:8080`
+4. Railway assigns public URL: `https://inventorysystemhackathon-production.up.railway.app`
+5. Swagger UI available at: `/swagger`
+
+### Frontend (Netlify)
+The Angular frontend is deployed on Netlify:
+1. Build command: `npm run build`
+2. Publish directory: `dist/inventory-system.client/browser`
+3. Connected GitHub repository for auto-deployment
+4. Live URL: `https://gregarious-empanada-1304aa.netlify.app/`
+
+### Environment Configuration
+- **API URL:** Update `apiUrl` in `InventorySystem.Client/src/app/services/inventory.ts`
+- **Database:** SQLite persists within Railway container
+- **CORS:** Configured to allow all origins for demo purposes
+
+---
+
+## �🔗 Repository
 
 **GitHub:** [https://github.com/Konark1/InventorySystem_Hackathon.git](https://github.com/Konark1/InventorySystem_Hackathon.git)
+---
 
+## 🤝 Contributing
+
+Contributions are welcome! Please read the [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on how to contribute to this project.
 ---
 
 ## 👥 Team / Developer
 
-[Your Name/Team Name Here]
+**Developer:** Konark1  
+**GitHub:** [@Konark1](https://github.com/Konark1)
 
 ---
 
 ## 📝 License
 
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+
 This project was created for hackathon purposes.
+
+---
+
+## 📜 Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for a list of changes and version history.
 
 ---
 
 ## 📌 Notes
 
-- The **design/** and **tests/** folders are currently empty. Upload wireframes and test evidence screenshots before final submission.
+- The **design/** folder contains Figma design mockups and flow diagrams.
+- The **tests/** folder contains XUnit test execution screenshots.
 - The actual infrastructure layer is in **InventorySystem1.Infrastructure/** (not InventorySystem.Infrastructure which contains VB files).
 - Database persists within the Railway container but may reset on redeployment.
 - For local development, the SQLite database file is created automatically on first run.

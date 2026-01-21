@@ -7,6 +7,9 @@
 3. **Stock Rules:** Inventory cannot drop below zero. The system prevents negative stock updates.
 4. **Database:** SQLite is used for simplicity and portability in the hackathon environment.
 5. **CORS Policy:** Open CORS policy (`AllowAll`) is configured to allow frontend development and testing.
+6. **Low Stock Alerts:** Low stock status is calculated on the client side using `quantity <= lowStockThreshold` logic.
+7. **API Architecture:** Clean Architecture pattern with separate layers: Core (Domain), Application (Interfaces), Infrastructure (Data Access), and API (Presentation).
+8. **Frontend Framework:** Angular 21 with standalone components, TypeScript, and Bootstrap 5 for styling.
 
 ## Limitations (Hackathon Scope)
 
