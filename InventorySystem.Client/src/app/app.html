@@ -45,7 +45,8 @@
 
         <td>
           <button class="btn btn-sm btn-success me-2" (click)="updateStock(item.id, 1)">+</button>
-          <button class="btn btn-sm btn-danger" (click)="updateStock(item.id, -1)">-</button>
+          <button class="btn btn-sm btn-danger me-2" (click)="updateStock(item.id, -1)">-</button>
+          <button class="btn btn-sm btn-outline-danger" (click)="deleteItem(item.id)" title="Delete Item">🗑️</button>
         </td>
       </tr>
     </tbody>

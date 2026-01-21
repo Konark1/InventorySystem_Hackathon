@@ -53,4 +53,13 @@ export class AppComponent implements OnInit {
       this.loadItems();
     });
   }
+
+  // 4. Delete Item
+  deleteItem(id: number) {
+    if (confirm('Are you sure you want to delete this item?')) {
+      this.inventoryService.deleteItem(id).subscribe(() => {
+        this.loadItems();
+      });
+    }
+  }
 }

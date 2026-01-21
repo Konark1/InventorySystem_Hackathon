@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-// This matches the C# class you wrote earlier
+//  matches the C# class 
 export interface InventoryItem {
   id: number;
   name: string;
@@ -29,8 +29,13 @@ export class InventoryService {
     return this.http.post(this.apiUrl, item);
   }
 
-  // 3. Update Stock (The Hackathon Logic)
+  // 3. Update Stock 
   updateStock(id: number, change: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/stock?id=${id}&change=${change}`, {});
+  }
+
+  // 4. Delete Item
+  deleteItem(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }
