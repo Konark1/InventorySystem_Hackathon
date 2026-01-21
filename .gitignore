@@ -1,0 +1,15 @@
+# Angular Heavy Files
+node_modules/
+dist/
+.angular/
+
+# .NET Heavy Files
+bin/
+obj/
+.vs/
+*.user
+
+# Local Database 
+*.db
+*.db-shm
+*.db-wal

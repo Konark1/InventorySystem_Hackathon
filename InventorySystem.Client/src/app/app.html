@@ -1,0 +1,53 @@
+<div class="container mt-5">
+  <h1 class="mb-4"> Inventory Dashboard</h1>
+
+  <div class="card p-4 mb-4 shadow-sm">
+    <h4>Add New Product</h4>
+    <div class="row g-2">
+      <div class="col-md-5">
+        <input type="text" class="form-control" placeholder="Item Name (e.g. Laptop)" [(ngModel)]="newItemName">
+      </div>
+      <div class="col-md-2">
+        <input type="number" class="form-control" placeholder="Qty" [(ngModel)]="newItemQty">
+      </div>
+      <div class="col-md-2">
+        <input type="number" class="form-control" placeholder="Alert Limit" [(ngModel)]="newItemThreshold">
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-primary w-100" (click)="addNewItem()">+ Add Item</button>
+      </div>
+    </div>
+  </div>
+
+  <table class="table table-bordered table-hover">
+    <thead class="table-dark">
+      <tr>
+        <th>ID</th>
+        <th>Product Name</th>
+        <th>Stock Level</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of items" [class.table-danger]="item.quantity <= item.lowStockThreshold">
+        <td>{{ item.id }}</td>
+        <td>{{ item.name }}</td>
+        
+        <td [class.fw-bold]="item.quantity <= item.lowStockThreshold">
+          {{ item.quantity }}
+        </td>
+
+        <td>
+          <span *ngIf="item.quantity <= item.lowStockThreshold" class="badge bg-danger"> LOW STOCK</span>
+          <span *ngIf="item.quantity > item.lowStockThreshold" class="badge bg-success">OK</span>
+        </td>
+
+        <td>
+          <button class="btn btn-sm btn-success me-2" (click)="updateStock(item.id, 1)">+</button>
+          <button class="btn btn-sm btn-danger" (click)="updateStock(item.id, -1)">-</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
