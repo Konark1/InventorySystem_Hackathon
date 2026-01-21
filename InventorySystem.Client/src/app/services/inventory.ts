@@ -15,7 +15,7 @@ export interface InventoryItem {
 })
 export class InventoryService {
   //PORT IS HERE:
-  private apiUrl = 'http://localhost:5160/api/inventory';
+  private apiUrl = 'https://inventorysystemhackathon-production.up.railway.app/api/inventory';
 
   constructor(private http: HttpClient) { }
 
