@@ -15,5 +15,8 @@ namespace InventorySystem.Core
         public string? AadhaarNumber { get; set; }   // Storing as string is safer for leading zeros
         public string? BusinessCategory { get; set; } // e.g., Electronics, Grocery
         public int Age { get; set; }
+
+        // NEW: User Role (ShopOwner or Admin)
+        public string Role { get; set; } = "ShopOwner"; // Default to ShopOwner
     }
 }

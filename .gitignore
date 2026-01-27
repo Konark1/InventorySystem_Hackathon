@@ -8,6 +8,8 @@ bin/
 obj/
 .vs/
 *.user
+publish/
+*.zip
 
 # Local Database 
 *.db

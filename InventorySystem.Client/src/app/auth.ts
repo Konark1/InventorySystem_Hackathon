@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
   providedIn: 'root'
@@ -42,5 +43,15 @@ export class AuthService {
   // 5. GET THE TOKEN (Read the card)
   getToken(): string | null {
     return localStorage.getItem('token');
+  }
+
+  // 6. GET USER ROLE from JWT
+  getUserRole(): string | null {
+    const token = localStorage.getItem('token'); // or however you store your JWT
+    if (!token) return null;
+
+    const decoded: any = jwtDecode(token);
+    // This 'role' key must match the Claim name in your ASP.NET backend
+    return decoded['role'] || decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
   }
 }

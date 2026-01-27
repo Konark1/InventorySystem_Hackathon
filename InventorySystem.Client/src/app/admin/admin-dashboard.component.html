@@ -1,0 +1,143 @@
+<!-- Loading Spinner Overlay -->
+<div *ngIf="isLoading" class="loading-overlay">
+  <div class="spinner"></div>
+</div>
+
+<div class="container mt-5">
+  
+  <!-- Header with Logout -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1 class="mb-0">🛡️ Admin Dashboard</h1>
+    <button (click)="logout()" class="btn btn-secondary">
+      Logout
+    </button>
+  </div>
+
+  <!-- Admin Stats Alert -->
+  <div style="background-color: #d1ecf1; color: #0c5460; padding: 15px; border: 1px solid #bee5eb; border-radius: 5px; margin-bottom: 20px;">
+    <strong>📊 System Overview:</strong> Total Shops: {{ totalShops }} | Total Items: {{ totalItems }}
+  </div>
+
+  <!-- Search Bar -->
+  <div style="margin-bottom: 20px;">
+    <input 
+      type="text" 
+      class="form-control"
+      [(ngModel)]="searchQuery" 
+      (keyup)="onSearch()" 
+      placeholder="🔍 Search for users by name, email, shop, or category..." 
+      style="padding: 10px; width: 100%; border: 1px solid #ccc; border-radius: 4px;"
+    />
+  </div>
+
+  <!-- Users Management Table -->
+  <table class="table table-bordered table-hover">
+    <thead class="table-dark">
+      <tr>
+        <th>ID</th>
+        <th>Full Name</th>
+        <th>Email</th>
+        <th>Shop Name</th>
+        <th>Category</th>
+        <th>Phone</th>
+        <th>Role</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of filteredUsers">
+        <td>{{ user.id }}</td>
+        <td>{{ user.fullName }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.shopName }}</td>
+        <td>
+          <span *ngIf="user.businessCategory === 'Electronics'" style="color: blue; font-weight: bold;">
+            🔌 {{ user.businessCategory }}
+          </span>
+          <span *ngIf="user.businessCategory === 'Grocery'" style="color: green; font-weight: bold;">
+            🛒 {{ user.businessCategory }}
+          </span>
+          <span *ngIf="user.businessCategory === 'Pharmacy'" style="color: red; font-weight: bold;">
+            💊 {{ user.businessCategory }}
+          </span>
+          <span *ngIf="user.businessCategory === 'Clothing'" style="color: purple; font-weight: bold;">
+            👕 {{ user.businessCategory }}
+          </span>
+          <span *ngIf="user.businessCategory !== 'Electronics' && user.businessCategory !== 'Grocery' && user.businessCategory !== 'Pharmacy' && user.businessCategory !== 'Clothing'" style="color: gray; font-weight: bold;">
+            🏪 {{ user.businessCategory }}
+          </span>
+        </td>
+        <td>{{ user.phoneNumber }}</td>
+        <td>
+          <span *ngIf="user.role === 'Admin'" style="color: red; font-weight: bold;">
+            🛡️ Admin
+          </span>
+          <span *ngIf="user.role === 'ShopOwner'" style="color: green; font-weight: bold;">
+            👤 Shop Owner
+          </span>
+        </td>
+        <td>
+          <button class="btn btn-sm btn-info me-2" (click)="viewUserDetails(user)" title="View Details">👁️ View</button>
+          <button class="btn btn-sm btn-outline-danger" (click)="deleteUser(user.id)" title="Delete User">🗑️ Delete</button>
+        </td>
+      </tr>
+      <tr *ngIf="filteredUsers.length === 0">
+        <td colspan="8" style="text-align: center; padding: 20px; color: #6c757d;">
+          No users found matching your search criteria.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- User Details Section -->
+  <div id="user-details-section" *ngIf="selectedUser" style="margin-top: 40px; border-top: 2px solid #ccc; padding-top: 20px;">
+    
+    <h2>👤 User Details: {{ selectedUser.fullName }}</h2>
+    
+    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+      <thead>
+        <tr style="background-color: #f8f9fa; text-align: left;">
+          <th style="padding: 10px; border-bottom: 2px solid #ddd;">Field</th>
+          <th style="padding: 10px; border-bottom: 2px solid #ddd;">Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Full Name</td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd;">{{ selectedUser.fullName }}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Email</td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd;">{{ selectedUser.email }}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Shop Name</td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd;">{{ selectedUser.shopName }}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Phone Number</td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd;">{{ selectedUser.phoneNumber }}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Business Category</td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd;">{{ selectedUser.businessCategory }}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Role</td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd;">
+            <span [style.color]="selectedUser.role === 'Admin' ? 'red' : 'green'">
+              {{ selectedUser.role }}
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Registered Date</td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd;">{{ selectedUser.registeredDate | date:'medium' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button class="btn btn-secondary mt-3" (click)="closeUserDetails()">Close Details</button>
+  </div>
+
+</div>

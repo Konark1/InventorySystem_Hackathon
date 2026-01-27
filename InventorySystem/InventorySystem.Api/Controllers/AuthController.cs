@@ -76,6 +76,7 @@ namespace InventorySystem.Api.Controllers
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id),
                     new Claim(ClaimTypes.Email, user.Email!),
+                    new Claim(ClaimTypes.Role, user.Role), // ?? Add Role to JWT token for authorization
                     new Claim("ShopName", user.ShopName ?? "Unknown Shop") // Store custom data inside the token!
                 }),
                 Expires = DateTime.UtcNow.AddDays(7), // Token lasts for 7 days
