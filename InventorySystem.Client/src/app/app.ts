@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common'; 
 import { FormsModule } from '@angular/forms'; 
+import { Router } from '@angular/router';
 import { InventoryService, InventoryItem, InventoryTransaction } from './services/inventory';
 import { AuthService } from './auth';
 import Swal from 'sweetalert2';
@@ -54,7 +55,8 @@ export class AppComponent implements OnInit {
 
   constructor(
     private inventoryService: InventoryService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -75,20 +77,30 @@ export class AppComponent implements OnInit {
       this.authService.login(this.authData).subscribe({
         next: () => {
           this.isAuthenticated = true;
-          this.loadItems();
+          
+          // Check user role and redirect accordingly
+          const role = this.authService.getUserRole();
+          
+          if (role === 'Admin') {
+            // Admin user - redirect to admin dashboard
+            this.router.navigate(['/admin']);
+          } else {
+            // Regular shop owner - stay on inventory dashboard
+            this.loadItems();
+          }
           
           // ✅ SUCCESS POPUP
           Swal.fire({
             title: 'Welcome Back!',
             text: 'Login successful.',
             icon: 'success',
-            timer: 1500, // Auto close after 1.5 seconds
+            timer: 1500,
             showConfirmButton: false
           });
-          this.isLoading = false; // ✅ STOP SPINNER
+          this.isLoading = false;
         },
         error: (err) => {
-          this.isLoading = false; // ✅ STOP SPINNER
+          this.isLoading = false;
           
           // ❌ ERROR POPUP
           Swal.fire({
