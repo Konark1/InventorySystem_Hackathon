@@ -25,6 +25,29 @@ appsettings.Production.json
 *.env
 .env.local
 
+# Sensitive Data Files
+*.csv
+*.xlsx
+production_data.*
+test_data.*
+
+# Deployment Scripts
+*.ps1
+deploy*.sh
+deploy*.bat
+
+# Personal Documentation
+PRESENTATION_SCRIPT.md
+DEPLOYMENT_VERIFICATION.md
+TODO.md
+NOTES.md
+
+# Backup Files
+*.sln~
+*.csproj~
+*.bak
+*.backup
+
 # IDE & Editor
 .vscode/
 .idea/
