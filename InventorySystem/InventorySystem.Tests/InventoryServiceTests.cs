@@ -1,8 +1,11 @@
 ﻿using InventorySystem.Core;
 using InventorySystem.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
+using Moq;
 using Xunit;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace InventorySystem.Tests
@@ -18,6 +21,19 @@ namespace InventorySystem.Tests
             return new InventoryDbContext(options);
         }
 
+        private IHttpContextAccessor CreateMockHttpContextAccessor(string userId = "test-user-id")
+        {
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, userId)
+            }));
+
+            var httpContext = new DefaultHttpContext { User = user };
+            var mockAccessor = new Mock<IHttpContextAccessor>();
+            mockAccessor.Setup(x => x.HttpContext).Returns(httpContext);
+            return mockAccessor.Object;
+        }
+
         // TEST 1: The "Stock Logic" Requirement
         // Does 10 + 5 actually equal 15?
         [Fact]
@@ -25,15 +41,16 @@ namespace InventorySystem.Tests
         {
             // 1. ARRANGE (Setup)
             var context = CreateInMemoryContext();
-            var service = new InventoryService(context);
-            var item = new InventoryItem { Name = "Nike Air", Quantity = 10 };
+            var httpContextAccessor = CreateMockHttpContextAccessor();
+            var service = new InventoryService(context, httpContextAccessor);
+            var item = new InventoryItem { Name = "Nike Air", Quantity = 10, UserId = "test-user-id" };
             await service.AddItemAsync(item);
 
             // 2. ACT (Do the action)
             await service.UpdateStockAsync(item.Id, 5);
 
             // 3. ASSERT (Check result)
-            var allItems = await service.GetAllItemsAsync();
+            var allItems = await service.GetAllItemsAsync(null);
             var updatedItem = allItems.First();
 
             Assert.Equal(15, updatedItem.Quantity); // Expect 15
