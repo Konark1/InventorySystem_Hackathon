@@ -9,8 +9,8 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Get the connection string from settings
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// TEMPORARY DEBUGGING: Hardcode the connection string to force it to work
+var connectionString = "Server=tcp:inventory-server-konark.database.windows.net,1433;Initial Catalog=inventory-db-konark;Persist Security Info=False;User ID=sqladmin;Password=InventoryApp@2026;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
 
 // 2. Check if we are running in Azure (Azure always has a variable called WEBSITE_SITE_NAME)
 var inAzure = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME"));
@@ -23,9 +23,9 @@ if (inAzure)
 }
 else
 {
-    // 💻 LAPTOP MODE: Use SQLite
+    // 💻 LAPTOP MODE: Use SQLite for local development
     builder.Services.AddDbContext<InventoryDbContext>(options =>
-        options.UseSqlite(connectionString));
+        options.UseSqlite("Data Source=inventory.db"));
 }
 
 // 1.1 Tell the app to use our 'ApplicationUser' for security
