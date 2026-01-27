@@ -1,0 +1,81 @@
+@startuml Deployment Architecture
+!theme superhero-outline
+
+node "Development Environment" {
+  folder "Source Code" {
+    component [Angular Frontend\n(TypeScript + HTML/CSS)] as Angular
+    component [ASP.NET Core Backend\n(C# + Entity Framework)] as DotNet
+  }
+  
+  database "Local Database" {
+    [SQL Server LocalDB]
+  }
+}
+
+cloud "GitHub Repository" {
+  [Version Control\n(Git)]
+}
+
+cloud "Netlify CDN" {
+  node "Static Hosting" {
+    [Angular Build Output\n(HTML + JS + CSS)] as FrontendBuild
+  }
+  component [Edge Servers\nGlobal Distribution] as CDN
+}
+
+cloud "Microsoft Azure" {
+  node "App Service (Linux)" {
+    [ASP.NET Core API\n(.NET 8 Runtime)] as API
+    [Kestrel Web Server] as Kestrel
+  }
+  
+  database "Azure SQL Database" {
+    [Production Database\n(SQL Server)] as ProdDB
+  }
+  
+  component [Application Insights] as Monitor
+}
+
+Angular ..> [Version Control] : git push
+DotNet ..> [Version Control] : git push
+
+[Version Control] ..> FrontendBuild : ng build --prod\n(auto deploy)
+[Version Control] ..> API : dotnet publish\n(manual zip deploy)
+
+FrontendBuild --> CDN : static assets
+CDN --> API : HTTPS API calls\n(CORS enabled)
+API --> Kestrel : hosting
+API --> ProdDB : Entity Framework\nSQL queries
+API --> Monitor : telemetry
+
+note right of FrontendBuild
+  **Production URL:**
+  https://dynamic-platypus-d176c2.netlify.app
+  
+  **Build Output:**
+  - main.js (473 KB)
+  - styles.css (231 KB)
+  - Total: ~704 KB
+end note
+
+note right of API
+  **Production URL:**
+  https://inventory-api-konark-
+  eac8bhaxg6hxhaec.centralindia-01.
+  azurewebsites.net
+  
+  **Region:** Central India
+  **Runtime:** .NET 8
+  **Deployment:** ZIP Deploy
+end note
+
+note right of ProdDB
+  **Server:**
+  inventory-server-konark.database.windows.net
+  
+  **Database:** InventoryDB
+  **Tier:** Basic
+  **Connection:** Encrypted (SSL)
+end note
+
+@enduml

@@ -1,209 +1,334 @@
 <!-- Loading Spinner Overlay -->
 <div *ngIf="isLoading" class="loading-overlay">
-  <div class="spinner"></div>
+  <div class="spinner-wrapper">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+  </div>
 </div>
 
-<div class="container mt-5">
-  
-  <!-- LOGIN/REGISTER SCREEN -->
-  <div *ngIf="!isAuthenticated" style="max-width: 400px; margin: 50px auto; border: 1px solid #ccc; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-    <h2 style="text-align: center;">{{ isLoginMode ? '🔐 Login' : '📝 Register Shop' }}</h2>
-    
-    <div style="margin-bottom: 10px;">
-      <label>Email:</label>
-      <input type="email" [(ngModel)]="authData.email" style="width: 100%; padding: 8px;">
+<!-- Authentication Pages -->
+<div *ngIf="!isAuthenticated" class="auth-container">
+  <div class="auth-card">
+    <!-- Logo & Header -->
+    <div class="auth-header">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </div>
+      <h1>{{ isLoginMode ? 'Welcome Back' : 'Create Your Account' }}</h1>
+      <p>{{ isLoginMode ? 'Sign in to access your inventory' : 'Start managing your inventory today' }}</p>
     </div>
-    <div style="margin-bottom: 10px;">
-      <label>Password:</label>
-      <input type="password" [(ngModel)]="authData.password" style="width: 100%; padding: 8px;">
-    </div>
 
-    <div *ngIf="!isLoginMode">
-      
-      <div style="margin-bottom: 10px;">
-        <label>Full Name:</label>
-        <input type="text" [(ngModel)]="authData.fullName" style="width: 100%; padding: 8px;">
+    <!-- Login Form -->
+    <form *ngIf="isLoginMode" class="auth-form">
+      <div class="form-group">
+        <label for="login-email">Email Address</label>
+        <div class="input-wrapper">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          <input type="email" id="login-email" [(ngModel)]="authData.email" name="email" placeholder="you@example.com" autocomplete="email" required>
+        </div>
       </div>
 
-      <div style="margin-bottom: 10px;">
-        <label>Shop Name:</label>
-        <input type="text" [(ngModel)]="authData.shopName" style="width: 100%; padding: 8px;">
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <div class="input-wrapper">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+          <input type="password" id="login-password" [(ngModel)]="authData.password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+        </div>
       </div>
 
-      <div style="margin-bottom: 10px;">
-        <label>Phone Number:</label>
-        <input type="text" [(ngModel)]="authData.phoneNumber" style="width: 100%; padding: 8px;">
+      <button type="submit" (click)="onAuthSubmit(); $event.preventDefault()" class="btn-submit">
+        Sign In
+      </button>
+    </form>
+
+    <!-- Register Form -->
+    <form *ngIf="!isLoginMode" class="auth-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="reg-fullname">Full Name *</label>
+          <input type="text" id="reg-fullname" [(ngModel)]="authData.fullName" name="fullName" placeholder="John Doe" autocomplete="name" required>
+        </div>
+        <div class="form-group">
+          <label for="reg-email">Email Address *</label>
+          <input type="email" id="reg-email" [(ngModel)]="authData.email" name="email" placeholder="you@example.com" autocomplete="email" required>
+        </div>
       </div>
 
-      <div style="margin-bottom: 10px;">
-        <label>Address:</label>
-        <textarea [(ngModel)]="authData.physicalAddress" style="width: 100%; padding: 8px;"></textarea>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="reg-password">Password *</label>
+          <input type="password" id="reg-password" [(ngModel)]="authData.password" name="password" placeholder="Min. 8 characters" autocomplete="new-password" required>
+        </div>
+        <div class="form-group">
+          <label for="reg-phone">Phone Number *</label>
+          <input type="tel" id="reg-phone" [(ngModel)]="authData.phoneNumber" name="phone" placeholder="+91 98765 43210" autocomplete="tel" required>
+        </div>
       </div>
 
-      <div style="margin-bottom: 10px;">
-        <label>Aadhaar Number:</label>
-        <input type="text" [(ngModel)]="authData.aadhaarNumber" placeholder="xxxx-xxxx-xxxx" style="width: 100%; padding: 8px;">
+      <div class="form-group">
+        <label for="reg-shopname">Shop Name *</label>
+        <input type="text" id="reg-shopname" [(ngModel)]="authData.shopName" name="shopName" placeholder="My Retail Store" autocomplete="organization" required>
       </div>
 
-      <div style="margin-bottom: 10px;">
-        <label>Business Category:</label>
-        <select [(ngModel)]="authData.businessCategory" style="width: 100%; padding: 8px;">
+      <div class="form-group">
+        <label for="reg-category">Business Category *</label>
+        <select id="reg-category" [(ngModel)]="authData.businessCategory" name="category" autocomplete="off" required>
           <option value="">Select Category</option>
-          <option value="Electronics">Electronics</option>
-          <option value="Grocery">Grocery</option>
-          <option value="Clothing">Clothing</option>
-          <option value="Pharmacy">Pharmacy</option>
-          <option value="Other">Other</option>
+          <option value="Electronics">📱 Electronics</option>
+          <option value="Grocery">🛒 Grocery</option>
+          <option value="Clothing">👕 Clothing</option>
+          <option value="Pharmacy">💊 Pharmacy</option>
+          <option value="Hardware">🔧 Hardware</option>
+          <option value="Books">📚 Books</option>
+          <option value="Other">🏪 Other</option>
         </select>
       </div>
 
-      <div style="margin-bottom: 10px;">
-        <label>Age:</label>
-        <input type="number" [(ngModel)]="authData.age" style="width: 100%; padding: 8px;">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="reg-address">Physical Address *</label>
+          <input type="text" id="reg-address" [(ngModel)]="authData.physicalAddress" name="address" placeholder="123 Main St, City" autocomplete="street-address" required>
+        </div>
+        <div class="form-group">
+          <label for="reg-aadhaar">Aadhaar Number</label>
+          <input type="text" id="reg-aadhaar" [(ngModel)]="authData.aadhaarNumber" name="aadhaar" placeholder="xxxx-xxxx-xxxx" autocomplete="off">
+        </div>
       </div>
 
+      <div class="form-group">
+        <label for="reg-age">Age *</label>
+        <input type="number" id="reg-age" [(ngModel)]="authData.age" name="age" placeholder="18" min="18" autocomplete="off" required>
+      </div>
+
+      <button type="submit" (click)="onAuthSubmit(); $event.preventDefault()" class="btn-submit">
+        Create Account
+      </button>
+    </form>
+
+    <!-- Toggle Link -->
+    <div class="auth-footer">
+      <p>
+        {{ isLoginMode ? "Don't have an account?" : 'Already have an account?' }}
+        <a href="#" (click)="isLoginMode = !isLoginMode; $event.preventDefault()">
+          {{ isLoginMode ? 'Sign up' : 'Sign in' }}
+        </a>
+      </p>
     </div>
-
-    <button (click)="onAuthSubmit()" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 16px;">
-      {{ isLoginMode ? 'Login' : 'Register' }}
-    </button>
-
-    <p style="margin-top: 15px; text-align: center;">
-      <a href="#" (click)="isLoginMode = !isLoginMode; $event.preventDefault()" style="color: #007bff;">
-        {{ isLoginMode ? 'Need an account? Register here' : 'Have an account? Login here' }}
-      </a>
-    </p>
   </div>
+</div>
 
-  <!-- MAIN INVENTORY DASHBOARD (Only shown when authenticated) -->
-  <div *ngIf="isAuthenticated">
-    
-    <!-- Header with Logout -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h1 class="mb-0">📦 Inventory System</h1>
-      <button (click)="logout()" class="btn btn-secondary">
+<!-- Main Dashboard (Authenticated Users) -->
+<div *ngIf="isAuthenticated" class="dashboard">
+  <!-- Top Header -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <div class="header-left">
+        <div class="logo-small">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+          </svg>
+        </div>
+        <h1>Inventory Dashboard</h1>
+      </div>
+      <button (click)="logout()" class="btn-logout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
         Logout
       </button>
     </div>
+  </header>
 
-  <!-- Low Stock Alert -->
-  <div *ngIf="lowStockCount > 0" 
-       style="background-color: #fff3cd; color: #856404; padding: 15px; border: 1px solid #ffeeba; border-radius: 5px; margin-bottom: 20px;">
-    <strong>⚠️ Attention Needed:</strong> You have {{ lowStockCount }} product(s) running low on inventory.
-  </div>
+  <div class="dashboard-container">
+    <!-- Low Stock Alert -->
+    <div *ngIf="lowStockCount > 0" class="alert alert-warning">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <div>
+        <strong>Attention Required</strong>
+        <p>You have {{ lowStockCount }} product(s) running low on inventory</p>
+      </div>
+    </div>
 
-  <!-- Search Bar -->
-  <div style="margin-bottom: 20px;">
-    <input 
-      type="text" 
-      class="form-control"
-      [(ngModel)]="searchQuery" 
-      (keyup)="onSearch()" 
-      placeholder=" Search for an item..." 
-      style="padding: 10px; width: 100%; border: 1px solid #ccc; border-radius: 4px;"
-    />
-  </div>
+    <!-- Search Bar -->
+    <div class="search-section">
+      <div class="search-wrapper">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input 
+          type="text" 
+          [(ngModel)]="searchQuery" 
+          (keyup)="onSearch()" 
+          placeholder="Search products by name..."
+        />
+      </div>
+    </div>
 
-  <div class="card p-4 mb-4 shadow-sm">
-    <h4>Add New Product</h4>
-    <div class="row g-2">
-      <div class="col-md-4">
-        <input type="text" class="form-control" placeholder="Item Name (e.g. Laptop)" [(ngModel)]="newItem.name">
+    <!-- Add New Product Card -->
+    <div class="card add-product-card">
+      <h3>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Add New Product
+      </h3>
+      <div class="product-form">
+        <div class="form-row-inline">
+          <input type="text" placeholder="Product Name (e.g. Laptop)" [(ngModel)]="newItem.name" class="form-input">
+          <input type="number" placeholder="Quantity" [(ngModel)]="newItem.quantity" class="form-input-sm">
+          <input type="number" placeholder="Price (₹)" [(ngModel)]="newItem.price" class="form-input-sm">
+          <input type="number" placeholder="Alert Threshold" [(ngModel)]="newItem.lowStockThreshold" class="form-input-sm">
+          <button class="btn-add" (click)="addNewItem()">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add Product
+          </button>
+        </div>
       </div>
-      <div class="col-md-2">
-        <input type="number" class="form-control" placeholder="Qty" [(ngModel)]="newItem.quantity">
+    </div>
+
+    <!-- Products Table -->
+    <div class="card products-table-card">
+      <div class="table-header">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+          </svg>
+          Product Inventory
+        </h3>
+        <span class="product-count">{{ items.length }} Products</span>
       </div>
-      <div class="col-md-2">
-        <input type="number" class="form-control" placeholder="Price (₹)" [(ngModel)]="newItem.price">
+      
+      <div class="table-responsive">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Product Name</th>
+              <th>Stock Level</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of items" [class.low-stock-row]="item.quantity <= item.lowStockThreshold">
+              <td><span class="id-badge">{{item.id}}</span></td>
+              <td class="product-name">{{ item.name }}</td>
+              <td>
+                <span class="stock-badge" [class.stock-low]="item.quantity <= item.lowStockThreshold">
+                  {{ item.quantity }} units
+                </span>
+              </td>
+              <td class="price">₹{{ item.price }}</td>
+              <td>
+                <span class="status-badge" [class]="getStatusClass(item)">
+                  {{ getStatusText(item) }}
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn-action btn-increment" (click)="updateStock(item.id, 1)" title="Increase stock">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <line x1="12" y1="5" x2="12" y2="19"/>
+                      <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                  </button>
+                  <button class="btn-action btn-decrement" (click)="updateStock(item.id, -1)" title="Decrease stock">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                  </button>
+                  <button class="btn-action btn-history" (click)="viewHistory(item)" title="View history">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                  </button>
+                  <button class="btn-action btn-delete" (click)="deleteItem(item.id)" title="Delete product">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <div class="col-md-2">
-        <input type="number" class="form-control" placeholder="Alert Limit" [(ngModel)]="newItem.lowStockThreshold">
+    </div>
+
+    <!-- Transaction History Modal/Section -->
+    <div *ngIf="selectedHistory.length > 0" class="card history-card">
+      <div class="history-header">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Transaction History: {{ selectedItemName }}
+        </h3>
+        <button class="btn-close-history" (click)="selectedHistory = []">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
       </div>
-      <div class="col-md-2">
-        <button class="btn btn-primary w-100" (click)="addNewItem()">+ Add Item</button>
+      
+      <div class="history-table">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Date & Time</th>
+              <th>Transaction Type</th>
+              <th>Quantity Changed</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let record of selectedHistory">
+              <td>{{ record.transactionDate | date:'medium' }}</td>
+              <td>
+                <span class="transaction-type" [class.type-restock]="record.transactionType === 'Restock'" 
+                      [class.type-sale]="record.transactionType !== 'Restock'">
+                  {{ record.transactionType }}
+                </span>
+              </td>
+              <td>
+                <span class="quantity-change" [class.positive]="record.quantityChanged > 0" 
+                      [class.negative]="record.quantityChanged < 0">
+                  {{ record.quantityChanged > 0 ? '+' : '' }}{{ record.quantityChanged }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
-
-  <table class="table table-bordered table-hover">
-    <thead class="table-dark">
-      <tr>
-        <th>ID</th>
-        <th>Product Name</th>
-        <th>Stock Level</th>
-        <th>Price</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let item of items" [class.table-danger]="item.quantity <= item.lowStockThreshold">
-        <td>{{ item.id }}</td>
-        <td>{{ item.name }}</td>
-        
-        <td [class.fw-bold]="item.quantity <= item.lowStockThreshold">
-          {{ item.quantity }}
-        </td>
-
-        <td>₹{{ item.price }}</td>
-
-        <td>
-          <span *ngIf="item.quantity === 0" style="color: red; font-weight: bold;">
-            ❌ Out of Stock
-          </span>
-
-          <span *ngIf="item.quantity > 0 && item.quantity < 5" style="color: orange; font-weight: bold;">
-            ⚠️ Low Stock
-          </span>
-
-          <span *ngIf="item.quantity >= 5" style="color: green; font-weight: bold;">
-            ✅ In Stock
-          </span>
-        </td>
-
-        <td>
-          <button class="btn btn-sm btn-success me-2" (click)="updateStock(item.id, 1)">+</button>
-          <button class="btn btn-sm btn-danger me-2" (click)="updateStock(item.id, -1)">-</button>
-          <button class="btn btn-sm btn-outline-danger" (click)="deleteItem(item.id)" title="Delete Item">🗑️</button>
-          <button class="btn btn-sm btn-info ms-2" (click)="viewHistory(item)" title="View History"> History</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
-  <!-- Transaction History Section -->
-  <div id="history-section" *ngIf="selectedHistory.length > 0" style="margin-top: 40px; border-top: 2px solid #ccc; padding-top: 20px;">
-    
-    <h2> Transaction History: {{ selectedItemName }}</h2>
-    
-    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-      <thead>
-        <tr style="background-color: #f8f9fa; text-align: left;">
-          <th style="padding: 10px; border-bottom: 2px solid #ddd;">Date</th>
-          <th style="padding: 10px; border-bottom: 2px solid #ddd;">Type</th>
-          <th style="padding: 10px; border-bottom: 2px solid #ddd;">Change</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let record of selectedHistory">
-          <td style="padding: 10px; border-bottom: 1px solid #ddd;">
-            {{ record.transactionDate | date:'medium' }}
-          </td>
-          <td style="padding: 10px; border-bottom: 1px solid #ddd;">
-            <span [style.color]="record.transactionType === 'Restock' ? 'green' : 'red'">
-              {{ record.transactionType }}
-            </span>
-          </td>
-          <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">
-            {{ record.quantityChanged > 0 ? '+' : '' }}{{ record.quantityChanged }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <button class="btn btn-secondary mt-3" (click)="selectedHistory = []">Close History</button>
-  </div>
-
-  </div> <!-- End of isAuthenticated -->
-
 </div>

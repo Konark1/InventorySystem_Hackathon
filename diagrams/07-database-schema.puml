@@ -1,0 +1,94 @@
+@startuml Database Schema
+!theme plain
+
+entity "AspNetUsers" as users {
+  * Id : string <<PK>> <<GUID>>
+  --
+  * Email : string <<unique>>
+  * NormalizedEmail : string
+  * PasswordHash : string <<encrypted>>
+  * FullName : string
+  * ShopName : string
+  PhoneNumber : string
+  PhysicalAddress : string
+  AadhaarNumber : string
+  BusinessCategory : string
+  Age : int
+  * Role : string <<default: ShopOwner>>
+  * EmailConfirmed : bool
+  SecurityStamp : string
+  ConcurrencyStamp : string
+  AccessFailedCount : int
+  LockoutEnabled : bool
+  LockoutEnd : datetime?
+}
+
+entity "InventoryItems" as items {
+  * Id : int <<PK>> <<auto-increment>>
+  --
+  * Name : string
+  * Category : string
+  * Quantity : int
+  * Price : decimal(18,2)
+  Description : string
+  LowStockThreshold : int <<default: 5>>
+  * UserId : string <<FK>>
+  * CreatedAt : datetime
+  UpdatedAt : datetime
+}
+
+entity "InventoryTransactions" as trans {
+  * Id : int <<PK>> <<auto-increment>>
+  --
+  * InventoryItemId : int <<FK>>
+  * UserId : string <<FK>>
+  * Action : string <<Increment/Decrement>>
+  * Quantity : int
+  * Timestamp : datetime
+  Notes : string
+  PreviousQuantity : int
+  NewQuantity : int
+}
+
+users ||--o{ items : "owns"
+users ||--o{ trans : "creates"
+items ||--o{ trans : "tracks changes"
+
+note right of users
+  Identity framework tables:
+  - AspNetRoles
+  - AspNetUserRoles
+  - AspNetUserClaims
+  - AspNetUserLogins
+  - AspNetUserTokens
+  
+  Custom fields added:
+  - ShopName
+  - FullName
+  - PhoneNumber
+  - PhysicalAddress
+  - AadhaarNumber
+  - BusinessCategory
+  - Age
+  - Role (Admin/ShopOwner)
+end note
+
+note right of items
+  Each shop owner can only
+  see and manage their own
+  inventory items
+  
+  Filtered by UserId in queries
+end note
+
+note right of trans
+  Transaction log for audit trail
+  
+  Records every stock change:
+  - Who made the change
+  - When it happened
+  - What changed
+  - Previous vs new quantity
+end note
+
+@enduml

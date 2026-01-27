@@ -1,17 +1,54 @@
-# Angular Heavy Files
+# Angular Build Artifacts
 node_modules/
 dist/
 .angular/
+*.log
 
-# .NET Heavy Files
+# .NET Build Artifacts
 bin/
 obj/
 .vs/
 *.user
+*.suo
 publish/
 *.zip
 
-# Local Database 
+# Local Database Files
 *.db
 *.db-shm
 *.db-wal
+
+# Environment & Secrets
+appsettings.json
+appsettings.Development.json
+appsettings.Production.json
+*.env
+.env.local
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Deployment Packages
+deploy.zip
+deploy-*.zip
+
+# Test Results
+TestResults/
+*.trx
+*.coverage
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# Angular Cache
+.angular/cache/

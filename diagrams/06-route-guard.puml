@@ -1,0 +1,44 @@
+@startuml Route Guard Flow
+!theme aws-orange
+
+start
+:User navigates to route;
+
+if (Protected route?) then (No)
+  :Load page immediately;
+  #LightGreen
+  stop
+else (Yes)
+  if (JWT token exists\nin localStorage?) then (No)
+    :Redirect to /login;
+    #LightCoral
+    stop
+  else (Yes)
+    :Decode JWT token;
+    :Extract user claims\n(userId, email, role);
+    
+    if (Admin-only route?) then (No)
+      :Load page;
+      #LightGreen
+      stop
+    else (Yes)
+      :Check role claim;
+      if (Role = Admin?) then (No)
+        :Redirect to home /;
+        #LightCoral
+        note right
+          AdminGuard prevents
+          shop owners from accessing
+          admin dashboard
+        end note
+        stop
+      else (Yes)
+        :Load admin page;
+        #LightGreen
+        stop
+      endif
+    endif
+  endif
+endif
+
+@enduml

@@ -2,24 +2,36 @@ import { Routes } from '@angular/router';
 import { adminGuard } from './auth/admin-guard';
 import { LandingComponent } from './landing/landing.component';
 import { AppComponent } from './app';
+import { AdminLoginComponent } from './admin/admin-login.component';
+import { AdminDashboardComponent } from './admin/admin-dashboard.component';
 
 export const routes: Routes = [
   { 
     path: '', 
-    component: LandingComponent // Landing page as home
+    component: LandingComponent
   },
   { 
     path: 'login', 
-    component: AppComponent // Your existing login/dashboard
+    component: AppComponent
   },
   { 
     path: 'register', 
-    component: AppComponent // Your existing register
+    component: AppComponent
+  },
+  // Hidden admin routes - no links, only accessible by direct URL
+  { 
+    path: 'admin/login', 
+    component: AdminLoginComponent
+  },
+  { 
+    path: 'admin/dashboard', 
+    component: AdminDashboardComponent,
+    canActivate: [adminGuard]
   },
   { 
     path: 'admin', 
-    loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule),
-    canActivate: [adminGuard]
+    redirectTo: 'admin/login',
+    pathMatch: 'full'
   },
   {
     path: '**',

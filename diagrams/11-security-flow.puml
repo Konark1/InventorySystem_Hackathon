@@ -1,0 +1,135 @@
+@startuml Security Flow
+!theme spacelab
+
+participant "User" as U
+participant "Frontend" as F
+participant "API Gateway" as G
+participant "Auth Service" as A
+participant "Protected Endpoint" as P
+participant "Database" as D
+
+== Registration ==
+U -> F: Submit registration form
+activate F
+F -> F: Validate inputs
+F -> G: POST /api/auth/register
+activate G
+G -> A: Process registration
+activate A
+A -> A: Validate email format
+A -> A: Check password strength
+A -> D: Check if email exists
+activate D
+D --> A: Email available
+deactivate D
+A -> A: Hash password (BCrypt)
+note right: Cost factor: 10\nSalt automatically generated
+A -> D: INSERT new user\nRole = ShopOwner
+activate D
+D --> A: User created
+deactivate D
+A --> G: 200 OK
+deactivate A
+G --> F: Success
+deactivate G
+F -> F: Auto-login
+F --> U: Redirect to dashboard
+deactivate F
+
+== Login ==
+U -> F: Submit credentials
+activate F
+F -> G: POST /api/auth/login\n{email, password}
+activate G
+G -> A: Authenticate user
+activate A
+A -> D: Find user by email
+activate D
+D --> A: User record
+deactivate D
+A -> A: Verify password hash
+note right: BCrypt.Verify(\n  password,\n  user.PasswordHash\n)
+alt Password Valid
+  A -> A: Generate JWT token
+  note right: Claims:\n- UserId\n- Email\n- Role\n- ShopName\n\nExpires: 7 days
+  A --> G: JWT token
+  deactivate A
+  G --> F: 200 OK + token
+  deactivate G
+  F -> F: Store in localStorage
+  F --> U: Redirect based on role
+  deactivate F
+else Password Invalid
+  A --> G: 401 Unauthorized
+  G --> F: Error message
+  F --> U: Show error
+end
+
+== Protected API Call ==
+U -> F: Request protected resource
+activate F
+F -> F: Retrieve JWT from localStorage
+F -> G: GET /api/inventory\nAuthorization: Bearer {token}
+activate G
+G -> G: Extract JWT from header
+G -> G: Validate JWT signature
+note right: Verify signature using\nJWT secret key
+G -> G: Check expiration
+alt Token Valid
+  G -> G: Extract claims\n(UserId, Email, Role)
+  G -> P: Forward request\nwith user context
+  activate P
+  P -> P: Get UserId from claims
+  P -> D: SELECT * FROM InventoryItems\nWHERE UserId = @UserId
+  activate D
+  D --> P: User's items only
+  deactivate D
+  P --> G: 200 OK + data
+  deactivate P
+  G --> F: Response
+  deactivate G
+  F --> U: Display data
+  deactivate F
+else Token Invalid/Expired
+  G --> F: 401 Unauthorized
+  F -> F: Clear localStorage
+  F --> U: Redirect to login
+end
+
+== Admin-Only Access ==
+U -> F: Navigate to /admin/dashboard
+activate F
+F -> F: Check JWT role claim
+alt Role = Admin
+  F -> G: GET /api/admin/users\nAuthorization: Bearer {token}
+  activate G
+  G -> G: Validate JWT
+  G -> G: Check role claim
+  note right: Require role = "Admin"
+  G -> P: [Authorize(Roles = "Admin")]
+  activate P
+  P -> D: SELECT * FROM AspNetUsers
+  activate D
+  D --> P: All users data
+  deactivate D
+  P --> G: 200 OK + data
+  deactivate P
+  G --> F: Response
+  deactivate G
+  F --> U: Show admin dashboard
+  deactivate F
+else Role != Admin
+  F -> F: AdminGuard blocks
+  F --> U: Redirect to home
+end
+
+== Token Refresh (Optional Future) ==
+note over U, D
+  Currently tokens expire after 7 days.
+  User must login again.
+  
+  Future enhancement: Implement refresh tokens
+  for seamless re-authentication
+end note
+
+@enduml

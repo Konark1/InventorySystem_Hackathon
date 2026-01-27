@@ -1,0 +1,51 @@
+@startuml System Architecture
+!define AZURE_COLOR #0078D4
+!define NETLIFY_COLOR #00C7B7
+!define PURPLE #8B5CF6
+
+skinparam componentStyle rectangle
+
+package "Frontend - Netlify" NETLIFY_COLOR {
+  [Landing Page] as LP
+  [Login/Register] as LR
+  [Shop Dashboard] as SD
+  [Admin Dashboard] as AD
+}
+
+package "Backend - Azure App Service" AZURE_COLOR {
+  [ASP.NET Core API] as API
+  [AuthController] as Auth
+  [InventoryController] as Inv
+  [AdminController] as Admin
+}
+
+package "Database - Azure SQL" {
+  database "AspNetUsers" as Users
+  database "Inventory Items" as Items
+  database "Transactions" as Trans
+}
+
+LP --> LR
+LR --> SD : Shop Owner
+LR --> AD : Admin
+
+LR --> Auth
+SD --> Inv
+AD --> Admin
+
+Auth --> Users
+Inv --> Items
+Inv --> Trans
+Admin --> Users
+Admin --> Items
+
+note right of LP
+  URL: https://dynamic-platypus-d176c2.netlify.app
+end note
+
+note right of API
+  URL: https://inventory-api-konark-
+  eac8bhaxg6hxhaec.centralindia-01.azurewebsites.net
+end note
+
+@enduml

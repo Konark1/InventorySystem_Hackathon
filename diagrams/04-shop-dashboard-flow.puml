@@ -1,0 +1,49 @@
+@startuml Shop Owner Dashboard Flow
+!theme sketchy-outline
+
+start
+:Shop Owner logs in;
+:Load dashboard;
+:GET /api/inventory;
+:Display products table;
+
+repeat
+  :Wait for user action;
+  
+  if (Action type?) then (Add Product)
+    :Show add product form;
+    :Fill product details\n(name, category, quantity, price);
+    :POST /api/inventory;
+    :Create new product;
+  elseif (Edit Product) then
+    :Show edit form with\ncurrent product data;
+    :Modify product details;
+    :PUT /api/inventory/{id};
+  elseif (Delete Product) then
+    :Confirm deletion\n(SweetAlert2);
+    if (Confirmed?) then (Yes)
+      :DELETE /api/inventory/{id};
+    else (No)
+      :Cancel;
+    endif
+  elseif (Increment Stock) then
+    :PUT /api/inventory/{id}/increment;
+    :Increase quantity by 1;
+  elseif (Decrement Stock) then
+    :PUT /api/inventory/{id}/decrement;
+    :Decrease quantity by 1;
+    :Create transaction record;
+  elseif (View History) then
+    :GET /api/inventory/{id}/transactions;
+    :Show transaction modal\n(timestamp, action, quantity);
+  else (Logout)
+    :Clear localStorage;
+    :Navigate to landing page;
+    stop
+  endif
+  
+  :Refresh product list;
+  
+repeat while (Continue using app?) is (Yes)
+
+@enduml

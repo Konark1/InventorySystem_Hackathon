@@ -1,0 +1,122 @@
+@startuml API Endpoint Architecture
+!theme carbon-gray
+
+package "API Gateway Layer" {
+  component [CORS Middleware\n(Allow Netlify origin)] as CORS
+  component [Authentication Middleware\n(JWT Bearer validation)] as Auth
+  component [Error Handling Middleware\n(Global exception handler)] as Error
+}
+
+package "Controllers Layer" {
+  component [AuthController] as AuthCtrl #LightBlue
+  component [InventoryController] as InvCtrl #LightGreen
+  component [AdminController] as AdminCtrl #LightCoral
+}
+
+package "Services Layer" {
+  component [UserManager<ApplicationUser>] as UserMgr
+  component [IInventoryService] as InvSvc
+  component [JWT Generator] as JWTGen
+  component [Password Hasher] as PwdHash
+}
+
+package "Data Access Layer" {
+  component [InventoryDbContext\n(Entity Framework Core)] as DbContext
+  component [DbSet<ApplicationUser>] as UserRepo
+  component [DbSet<InventoryItem>] as InvRepo
+  component [DbSet<InventoryTransaction>] as TransRepo
+}
+
+database "Azure SQL Database" {
+  storage [AspNetUsers Table] as UsersTable
+  storage [InventoryItems Table] as ItemsTable
+  storage [InventoryTransactions Table] as TransTable
+}
+
+CORS --> Auth
+Auth --> Error
+Error --> AuthCtrl
+Error --> InvCtrl
+Error --> AdminCtrl
+
+AuthCtrl --> UserMgr
+AuthCtrl --> JWTGen
+AuthCtrl --> PwdHash
+
+InvCtrl --> InvSvc
+InvCtrl --> TransRepo
+
+AdminCtrl --> UserMgr
+AdminCtrl --> InvSvc
+
+UserMgr --> DbContext
+InvSvc --> DbContext
+
+DbContext --> UserRepo
+DbContext --> InvRepo
+DbContext --> TransRepo
+
+UserRepo --> UsersTable
+InvRepo --> ItemsTable
+TransRepo --> TransTable
+
+note right of AuthCtrl
+  **Endpoints:**
+  POST /api/auth/register
+    - Input: email, password, shopName, etc
+    - Output: success message
+    
+  POST /api/auth/login
+    - Input: email, password
+    - Output: JWT token
+end note
+
+note right of InvCtrl
+  **Endpoints:** (Requires JWT)
+  GET /api/inventory
+    - Get all items for logged-in user
+    
+  POST /api/inventory
+    - Create new inventory item
+    
+  GET /api/inventory/{id}
+    - Get specific item details
+    
+  PUT /api/inventory/{id}
+    - Update item details
+    
+  DELETE /api/inventory/{id}
+    - Delete item
+    
+  PUT /api/inventory/{id}/increment
+    - Increase stock by 1
+    
+  PUT /api/inventory/{id}/decrement
+    - Decrease stock by 1
+    
+  GET /api/inventory/{id}/transactions
+    - Get transaction history
+end note
+
+note right of AdminCtrl
+  **Endpoints:** (Requires Admin Role)
+  GET /api/admin/stats
+    - System-wide statistics
+    
+  GET /api/admin/users
+    - Get all registered users
+    
+  GET /api/admin/users/{id}
+    - Get specific user details
+    
+  PUT /api/admin/promote/{userId}
+    - Promote user to Admin
+    
+  PUT /api/admin/demote/{userId}
+    - Demote user to ShopOwner
+    
+  DELETE /api/admin/users/{id}
+    - Delete user account
+end note
+
+@enduml

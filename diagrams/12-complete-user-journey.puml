@@ -1,0 +1,163 @@
+@startuml Complete User Journey
+!theme materia-outline
+
+[*] --> Landing : Visit website
+
+state Landing {
+  [*] --> ViewHero
+  ViewHero : Dashboard Mockup Display
+  ViewHero : Stats (12M+ users)
+  
+  ViewHero --> ViewFeatures : Scroll down
+  ViewFeatures : Real-Time Tracking
+  ViewFeatures : Smart Alerts
+  ViewFeatures : Analytics
+  
+  ViewFeatures --> ViewIntegrations : Continue
+  ViewIntegrations : Shopify, Amazon
+  ViewIntegrations : WooCommerce, etc
+  
+  ViewIntegrations --> CTASection : Scroll
+  CTASection : Get Started button
+  CTASection : Watch Demo button
+}
+
+Landing --> Register : Click "Get Started"
+Landing --> Login : Click "Sign In"
+
+state Register {
+  [*] --> FillRegistrationForm
+  FillRegistrationForm : Full Name
+  FillRegistrationForm : Email
+  FillRegistrationForm : Password
+  FillRegistrationForm : Phone Number
+  FillRegistrationForm : Shop Name
+  FillRegistrationForm : Business Category
+  FillRegistrationForm : Physical Address
+  FillRegistrationForm : Aadhaar Number
+  FillRegistrationForm : Age
+  
+  FillRegistrationForm --> ValidateForm
+  ValidateForm --> FillRegistrationForm : Validation errors
+  ValidateForm --> SubmitRegistration : All valid
+  
+  SubmitRegistration --> CreateAccount : POST /api/auth/register
+  CreateAccount --> [*] : Success
+}
+
+state Login {
+  [*] --> EnterCredentials
+  EnterCredentials : Email
+  EnterCredentials : Password
+  
+  EnterCredentials --> AuthenticateUser : POST /api/auth/login
+  AuthenticateUser --> CheckRole : JWT received
+  
+  CheckRole --> [*] : Role extracted
+}
+
+Register --> ShopDashboard : Auto-login\n(Role: ShopOwner)
+Login --> ShopDashboard : Shop Owner
+Login --> AdminDashboard : Admin
+
+state ShopDashboard {
+  [*] --> ViewProducts
+  ViewProducts : Display product table
+  ViewProducts : Low stock alerts
+  ViewProducts : Search functionality
+  
+  ViewProducts --> AddProduct : Click "Add Product"
+  AddProduct : Enter product details
+  AddProduct : POST /api/inventory
+  AddProduct --> ViewProducts : Success
+  
+  ViewProducts --> EditProduct : Click "Edit"
+  EditProduct : Modify product
+  EditProduct : PUT /api/inventory/{id}
+  EditProduct --> ViewProducts : Updated
+  
+  ViewProducts --> DeleteProduct : Click "Delete"
+  DeleteProduct : Confirm deletion
+  DeleteProduct : DELETE /api/inventory/{id}
+  DeleteProduct --> ViewProducts : Removed
+  
+  ViewProducts --> IncrementStock : Click "+"
+  IncrementStock : PUT /api/inventory/{id}/increment
+  IncrementStock --> ViewProducts : Quantity +1
+  
+  ViewProducts --> DecrementStock : Click "-"
+  DecrementStock : PUT /api/inventory/{id}/decrement
+  DecrementStock : Create transaction
+  DecrementStock --> ViewProducts : Quantity -1
+  
+  ViewProducts --> ViewHistory : Click "History"
+  ViewHistory : Display transactions
+  ViewHistory : Timestamp, action, quantity
+  ViewHistory --> ViewProducts : Close modal
+}
+
+state AdminDashboard {
+  [*] --> ViewSystemStats
+  ViewSystemStats : Total Shops
+  ViewSystemStats : Total Items
+  ViewSystemStats : System Overview
+  
+  ViewSystemStats --> ViewAllUsers : Load users table
+  ViewAllUsers : ID, Name, Email
+  ViewAllUsers : Shop, Category
+  ViewAllUsers : Phone, Role
+  
+  ViewAllUsers --> ViewUserDetails : Click "View"
+  ViewUserDetails : Full user info
+  ViewUserDetails : Registration date
+  ViewUserDetails --> ViewAllUsers : Close modal
+  
+  ViewAllUsers --> PromoteUser : Click "Promote"
+  PromoteUser : PUT /api/admin/promote/{id}
+  PromoteUser : Role → Admin
+  PromoteUser --> ViewAllUsers : Updated
+  
+  ViewAllUsers --> DemoteUser : Click "Demote"
+  DemoteUser : PUT /api/admin/demote/{id}
+  DemoteUser : Role → ShopOwner
+  DemoteUser --> ViewAllUsers : Updated
+  
+  ViewAllUsers --> DeleteUser : Click "Delete"
+  DeleteUser : Confirm deletion
+  DeleteUser : DELETE /api/admin/users/{id}
+  DeleteUser --> ViewAllUsers : Removed
+  
+  ViewAllUsers --> SearchUsers : Type in search box
+  SearchUsers : Filter by name/email/shop
+  SearchUsers --> ViewAllUsers : Display results
+}
+
+ShopDashboard --> Landing : Logout
+AdminDashboard --> Landing : Logout
+
+note right of Register
+  Password Requirements:
+  - Min 6 characters
+  - 1 uppercase letter
+  - 1 lowercase letter
+  - 1 number
+  - 1 special character
+end note
+
+note right of ShopDashboard
+  Shop owners can only see
+  and manage their own products.
+  
+  Data filtered by UserId from JWT token.
+end note
+
+note right of AdminDashboard
+  Admin route protected by:
+  1. AuthGuard (requires login)
+  2. AdminGuard (requires Admin role)
+  
+  Only users with Role="Admin"
+  can access this dashboard.
+end note
+
+@enduml

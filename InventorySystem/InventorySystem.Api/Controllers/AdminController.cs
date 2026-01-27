@@ -56,8 +56,10 @@ namespace InventorySystem.Api.Controllers
                 u.Email,
                 u.ShopName,
                 u.FullName,
+                u.PhoneNumber,
                 u.Role,
-                u.BusinessCategory
+                u.BusinessCategory,
+                RegisteredDate = u.Id // You can add a proper timestamp field if available
             }).ToList();
 
             return Ok(users);

@@ -1,0 +1,32 @@
+@startuml Registration Flow
+!theme blueprint
+
+start
+:User visits /register;
+:Fill registration form\n(name, email, password,\nshop name, phone, etc);
+
+repeat
+  :Validate form fields;
+  backward:Show validation errors;
+repeat while (Form valid?) is (No)
+->Yes;
+
+:Submit to API;
+:POST /api/auth/register;
+
+if (Email already exists?) then (Yes)
+  :Return 400 Bad Request;
+  :Show error message;
+  stop
+else (No)
+  :Hash password (BCrypt);
+  :Create ApplicationUser\nwith Role=ShopOwner;
+  :Save to AspNetUsers table;
+  :Return 200 OK;
+  :Auto-login user;
+  :Store JWT token;
+  :Navigate to shop dashboard;
+  stop
+endif
+
+@enduml

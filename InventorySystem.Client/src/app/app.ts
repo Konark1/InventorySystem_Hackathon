@@ -29,7 +29,7 @@ export class AppComponent implements OnInit {
     physicalAddress: '',
     aadhaarNumber: '',
     businessCategory: '',
-    age: null // Use null for numbers initially
+    age: 0 // Initialize with 0 instead of null
   };
   
   items: InventoryItem[] = [];
@@ -60,6 +60,14 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    // Check current route to determine if register or login
+    const currentUrl = this.router.url;
+    if (currentUrl.includes('/register')) {
+      this.isLoginMode = false; // Show register form
+    } else if (currentUrl.includes('/login')) {
+      this.isLoginMode = true; // Show login form
+    }
+    
     // Check if already logged in
     this.isAuthenticated = this.authService.isLoggedIn();
     
@@ -213,5 +221,18 @@ export class AppComponent implements OnInit {
         document.getElementById('history-section')?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     });
+  }
+
+  // Helper methods for status display
+  getStatusClass(item: InventoryItem): string {
+    if (item.quantity === 0) return 'status-out-of-stock';
+    if (item.quantity <= item.lowStockThreshold) return 'status-low-stock';
+    return 'status-in-stock';
+  }
+
+  getStatusText(item: InventoryItem): string {
+    if (item.quantity === 0) return '❌ Out of Stock';
+    if (item.quantity <= item.lowStockThreshold) return '⚠️ Low Stock';
+    return '✅ In Stock';
   }
 }

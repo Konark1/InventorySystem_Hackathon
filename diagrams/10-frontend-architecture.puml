@@ -1,0 +1,118 @@
+@startuml Frontend Component Architecture
+!theme materia
+
+package "Core Modules" {
+  component [App Module\n(Bootstrap)] as AppModule
+  component [Router Module\n(Routes config)] as Router
+  component [HTTP Client Module\n(API calls)] as HTTP
+  component [Forms Module\n(NgModel)] as Forms
+}
+
+package "Shared Components" {
+  component [Loading Spinner] as Loader
+  component [SweetAlert2\n(Notifications)] as Alert
+}
+
+package "Auth Module" {
+  component [Login/Register Component\n(app.html)] as Auth #LightBlue
+  component [AuthService\n(auth.ts)] as AuthSvc #Yellow
+  component [Auth Interceptor\n(Add JWT to headers)] as Interceptor #Orange
+  component [Auth Guard\n(Protect routes)] as AuthGuard #Orange
+  component [Admin Guard\n(Admin-only routes)] as AdminGuard #Orange
+}
+
+package "Landing Module" {
+  component [Landing Component\n(Figma-inspired UI)] as Landing #LightSkyBlue
+  component [Hero Section\n(Dashboard mockup)] as Hero
+  component [Features Section\n(6 feature cards)] as Features
+  component [Integrations Section\n(6 service cards)] as Integrations
+  component [CTA Section\n(Purple gradient)] as CTA
+  component [Footer\n(Multi-column)] as Footer
+}
+
+package "Dashboard Module" {
+  component [Shop Dashboard\n(Product management)] as Dashboard #LightGreen
+  component [Add Product Modal] as AddModal #LightGreen
+  component [Edit Product Modal] as EditModal #LightGreen
+  component [Transaction History Modal] as HistoryModal #LightGreen
+  component [InventoryService\n(services/inventory.ts)] as InvSvc #Yellow
+}
+
+package "Admin Module" {
+  component [Admin Login\n(Dark theme stealth)] as AdminLogin #LightCoral
+  component [Admin Dashboard\n(User management)] as AdminDash #LightCoral
+  component [User Details Modal] as UserModal #LightCoral
+  component [Admin Service] as AdminSvc #Yellow
+}
+
+AppModule --> Router
+AppModule --> HTTP
+AppModule --> Forms
+Router --> AuthGuard
+Router --> AdminGuard
+
+Auth --> AuthSvc
+AuthSvc --> HTTP
+AuthSvc ..> Interceptor : registers
+
+Landing --> Hero
+Landing --> Features
+Landing --> Integrations
+Landing --> CTA
+Landing --> Footer
+
+Dashboard --> InvSvc
+Dashboard --> AddModal
+Dashboard --> EditModal
+Dashboard --> HistoryModal
+InvSvc --> HTTP
+
+AdminLogin --> AuthSvc
+AdminDash --> AdminSvc
+AdminDash --> UserModal
+AdminSvc --> HTTP
+
+AuthGuard --> AuthSvc
+AdminGuard --> AuthSvc
+
+Loader ..> Dashboard : used by
+Loader ..> AdminDash : used by
+Alert ..> Dashboard : used by
+Alert ..> Auth : used by
+
+note right of Router
+  **Routes:**
+  / → Landing Component
+  /login → App Component (login mode)
+  /register → App Component (register mode)
+  /dashboard → Shop Dashboard (AuthGuard)
+  /admin/login → Admin Login
+  /admin/dashboard → Admin Dashboard (AdminGuard)
+end note
+
+note right of AuthSvc
+  **Methods:**
+  - register(user)
+  - login(credentials)
+  - logout()
+  - isLoggedIn()
+  - getToken()
+  - getUserRole()
+  
+  **Storage:**
+  localStorage['token']
+end note
+
+note right of InvSvc
+  **API Calls:**
+  - getAllItems()
+  - getItemById(id)
+  - createItem(item)
+  - updateItem(id, item)
+  - deleteItem(id)
+  - incrementStock(id)
+  - decrementStock(id)
+  - getTransactions(id)
+end note
+
+@enduml

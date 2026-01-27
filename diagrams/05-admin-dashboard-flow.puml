@@ -1,0 +1,67 @@
+@startuml Admin Dashboard Flow
+!theme vibrant
+
+|User|
+start
+:Admin enters credentials\n(admin@inventory.com);
+:POST /api/auth/login;
+
+|Backend|
+:Verify credentials;
+:Check if Role = Admin;
+:Generate JWT with Admin role claim;
+
+|Frontend|
+:Receive JWT token;
+:Decode and verify role;
+
+if (Role = Admin?) then (No)
+  :Redirect to home page;
+  #LightCoral
+  stop
+else (Yes)
+  :Load admin dashboard;
+  #LightGreen
+  
+  |API Calls|
+  :GET /api/admin/stats;
+  :Display system statistics\n(total shops, total items);
+  
+  :GET /api/admin/users;
+  :Display all users table\n(ID, name, email, shop,\ncategory, phone, role);
+  
+  |User Interactions|
+  repeat
+    :Wait for admin action;
+    
+    if (Action?) then (View User Details)
+      :Show user details modal\n(all user information);
+    elseif (Promote User)
+      :PUT /api/admin/promote/{userId};
+      :Update role to Admin;
+      :Show success message;
+    elseif (Demote User)
+      :PUT /api/admin/demote/{userId};
+      :Update role to ShopOwner;
+      :Show success message;
+    elseif (Delete User)
+      :Confirm deletion;
+      if (Confirmed?) then (Yes)
+        :DELETE /api/admin/users/{userId};
+        :Remove user from database;
+      endif
+    elseif (Search Users)
+      :Filter by name/email/shop/category;
+      :Update displayed results;
+    else (Logout)
+      :Clear token;
+      :Navigate to landing;
+      stop
+    endif
+    
+    :Refresh user list;
+    
+  repeat while (Continue?) is (Yes)
+endif
+
+@enduml

@@ -1,153 +1,111 @@
 # 📡 API Documentation
 
-**Base URL:** `https://inventorysystemhackathon-production.up.railway.app`
+**Base URL:** `https://inventory-api-konark-eac8bhaxg6hxhaec.centralindia-01.azurewebsites.net/api`
+
+**Interactive Documentation:** [Swagger/Scalar UI](https://inventory-api-konark-eac8bhaxg6hxhaec.centralindia-01.azurewebsites.net/scalar/v1)
 
 ---
 
-## 📦 Inventory Endpoints
+## 🔐 Authentication Endpoints
 
-### 1. Get All Inventory Items
-- **Method:** `GET`
-- **Endpoint:** `/api/inventory`
-- **Description:** Retrieve all inventory items from the system.
-- **Request:** None
-- **Response Example:**
-```json
-[
-  {
-    "id": 1,
-    "name": "Laptop",
-    "quantity": 10,
-    "lowStockThreshold": 5
-  },
-  {
-    "id": 2,
-    "name": "Mouse",
-    "quantity": 3,
-    "lowStockThreshold": 5
-  }
-]
-```
+### 1. Register New User
+`POST /auth/register` - Register a new shop owner account
 
-> **Note:** The `isLowStock` status can be determined on the client side by checking if `quantity <= lowStockThreshold`
-
-### 2. Add New Item
-- **Method:** `POST`
-- **Endpoint:** `/api/inventory`
-- **Description:** Add a new product to the inventory system.
-- **Request Body:**
+**Request Body:**
 ```json
 {
-  "name": "Laptop",
-  "quantity": 10,
-  "lowStockThreshold": 5
+  "email": "shop@example.com",
+  "password": "StrongPass123!",
+  "fullName": "John Doe",
+  "shopName": "John's Electronics",
+  "phoneNumber": "9876543210",
+  "physicalAddress": "123 Main St",
+  "aadhaarNumber": "123456789012",
+  "businessCategory": "Electronics",
+  "age": 30
 }
 ```
-- **Response Example:**
+
+**Password Requirements:** Min 6 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special char
+
+---
+
+### 2. Login
+`POST /auth/login` - Get JWT token (expires in 7 days)
+
+**Request Body:**
 ```json
 {
-  "id": 1,
-  "name": "Laptop",
-  "quantity": 10,
-  "lowStockThreshold": 5
+  "email": "shop@example.com",
+  "password": "StrongPass123!"
+}
+```
+
+**Response:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 
 ---
 
-## 📊 Stock Operations
+## 📦 Inventory Endpoints (Requires Auth)
 
-### 3. Update Stock Levels
-- **Method:** `POST`
-- **Endpoint:** `/api/inventory/stock?id={id}&change={change}`
-- **Description:** Update stock levels by incrementing or decrementing quantity.
-- **Query Parameters:**
-  - `id` (int): The ID of the inventory item
-  - `change` (int): The quantity to add (positive) or remove (negative)
-- **Example URLs:**
-  - Add 5 items: `/api/inventory/stock?id=1&change=5`
-  - Remove 3 items: `/api/inventory/stock?id=1&change=-3`
-- **Response Example:**
-```json
-{
-  "message": "Stock updated"
-}
-```
+### 3. Get All Items
+`GET /inventory` - Get all items for authenticated user
 
----
+### 4. Get Single Item
+`GET /inventory/{id}` - Get specific item details
 
-## 📋 Data Model
+### 5. Add Item
+`POST /inventory` - Create new inventory item
 
-### InventoryItem
-```json
-{
-  "id": 1,
-  "name": "string",
-  "quantity": 0,
-  "lowStockThreshold": 0
-}
-```
+### 6. Update Item
+`PUT /inventory/{id}` - Update existing item
 
-**Field Descriptions:**
-- `id`: Unique identifier (auto-generated)
-- `name`: Product name
-- `quantity`: Current stock quantity
-- `lowStockThreshold`: Minimum stock level before alert
+### 7. Delete Item
+`DELETE /inventory/{id}` - Delete item permanently
 
-> **Note:** The model includes an `IsLowStock()` method (not serialized in JSON) that returns `true` when `quantity <= lowStockThreshold`. The frontend should implement this logic for UI indicators.
+### 8. Increment Stock
+`PUT /inventory/{id}/increment` - Increase quantity by 1
+
+### 9. Decrement Stock
+`PUT /inventory/{id}/decrement` - Decrease quantity by 1
+
+### 10. Transaction History
+`GET /inventory/{id}/transactions` - Get audit trail
 
 ---
 
-## 🔴 Error Responses
+## 👤 Admin Endpoints (Requires Admin Role)
 
-### 400 Bad Request
-```json
-{
-  "error": "Invalid request data"
-}
-```
+### 11. System Stats
+`GET /admin/stats` - Get total users, items, and value
 
-### 404 Not Found
-```json
-{
-  "error": "Item not found"
-}
-```
+### 12. All Users
+`GET /admin/users` - List all registered users with details
 
-### 500 Internal Server Error
-```json
-{
-  "error": "An error occurred while processing your request"
-}
-```
+### 13. Promote User
+`POST /admin/promote/{userId}` - Upgrade to Admin role
+
+### 14. Demote User
+`POST /admin/demote/{userId}` - Downgrade to ShopOwner
+
+### 15. Delete User
+`DELETE /admin/users/{userId}` - Remove user and their items
 
 ---
 
-## 🧪 Testing with cURL
+## 🔒 Authorization Matrix
 
-### Get All Items
-```bash
-curl -X GET https://inventorysystemhackathon-production.up.railway.app/api/inventory
-```
-
-### Add New Item
-```bash
-curl -X POST https://inventorysystemhackathon-production.up.railway.app/api/inventory \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Laptop","quantity":10,"lowStockThreshold":5}'
-```
-
-### Update Stock
-```bash
-curl -X POST "https://inventorysystemhackathon-production.up.railway.app/api/inventory/stock?id=1&change=5"
-```
+| Endpoint | Anonymous | Shop Owner | Admin |
+|----------|-----------|------------|-------|
+| Register/Login | ✅ | ✅ | ✅ |
+| Inventory CRUD | ❌ | ✅ (own) | ✅ (all) |
+| Admin endpoints | ❌ | ❌ | ✅ |
 
 ---
 
-## 📝 Notes
-
-- All endpoints return JSON responses
-- No authentication required (for demo purposes)
-- Stock quantity cannot go below 0 (automatically set to 0 if negative)
-- Low stock status should be calculated on the client side: `quantity <= lowStockThreshold`
-- The API does not include `isLowStock` in responses; implement this logic in your frontend
+**Full documentation:** [View Complete API Docs](./api_endpoints_full.md)  
+**Interactive testing:** [Swagger UI](https://inventory-api-konark-eac8bhaxg6hxhaec.centralindia-01.azurewebsites.net/scalar/v1)

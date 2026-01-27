@@ -1,0 +1,35 @@
+@startuml Authentication Flow
+!theme cerulean-outline
+
+actor User
+participant "Frontend\n(Angular)" as Frontend
+participant "API\n(ASP.NET Core)" as API
+participant "Database\n(Azure SQL)" as DB
+
+User -> Frontend: Enter credentials
+activate Frontend
+
+Frontend -> API: POST /api/auth/login\n{email, password}
+activate API
+
+API -> DB: Validate user credentials
+activate DB
+DB --> API: User data + role
+deactivate DB
+
+API -> API: Generate JWT token\n(with role claim)
+API --> Frontend: JWT token
+deactivate API
+
+Frontend -> Frontend: Store token in localStorage
+
+alt Admin Role
+    Frontend -> Frontend: Navigate to /admin/dashboard
+else Shop Owner Role
+    Frontend -> Frontend: Navigate to /dashboard
+end
+
+Frontend --> User: Display dashboard
+deactivate Frontend
+
+@enduml
