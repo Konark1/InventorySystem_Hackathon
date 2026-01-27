@@ -1,19 +1,125 @@
+<!-- Loading Spinner Overlay -->
+<div *ngIf="isLoading" class="loading-overlay">
+  <div class="spinner"></div>
+</div>
+
 <div class="container mt-5">
-  <h1 class="mb-4"> Inventory Dashboard</h1>
+  
+  <!-- LOGIN/REGISTER SCREEN -->
+  <div *ngIf="!isAuthenticated" style="max-width: 400px; margin: 50px auto; border: 1px solid #ccc; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <h2 style="text-align: center;">{{ isLoginMode ? '🔐 Login' : '📝 Register Shop' }}</h2>
+    
+    <div style="margin-bottom: 10px;">
+      <label>Email:</label>
+      <input type="email" [(ngModel)]="authData.email" style="width: 100%; padding: 8px;">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label>Password:</label>
+      <input type="password" [(ngModel)]="authData.password" style="width: 100%; padding: 8px;">
+    </div>
+
+    <div *ngIf="!isLoginMode">
+      
+      <div style="margin-bottom: 10px;">
+        <label>Full Name:</label>
+        <input type="text" [(ngModel)]="authData.fullName" style="width: 100%; padding: 8px;">
+      </div>
+
+      <div style="margin-bottom: 10px;">
+        <label>Shop Name:</label>
+        <input type="text" [(ngModel)]="authData.shopName" style="width: 100%; padding: 8px;">
+      </div>
+
+      <div style="margin-bottom: 10px;">
+        <label>Phone Number:</label>
+        <input type="text" [(ngModel)]="authData.phoneNumber" style="width: 100%; padding: 8px;">
+      </div>
+
+      <div style="margin-bottom: 10px;">
+        <label>Address:</label>
+        <textarea [(ngModel)]="authData.physicalAddress" style="width: 100%; padding: 8px;"></textarea>
+      </div>
+
+      <div style="margin-bottom: 10px;">
+        <label>Aadhaar Number:</label>
+        <input type="text" [(ngModel)]="authData.aadhaarNumber" placeholder="xxxx-xxxx-xxxx" style="width: 100%; padding: 8px;">
+      </div>
+
+      <div style="margin-bottom: 10px;">
+        <label>Business Category:</label>
+        <select [(ngModel)]="authData.businessCategory" style="width: 100%; padding: 8px;">
+          <option value="">Select Category</option>
+          <option value="Electronics">Electronics</option>
+          <option value="Grocery">Grocery</option>
+          <option value="Clothing">Clothing</option>
+          <option value="Pharmacy">Pharmacy</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom: 10px;">
+        <label>Age:</label>
+        <input type="number" [(ngModel)]="authData.age" style="width: 100%; padding: 8px;">
+      </div>
+
+    </div>
+
+    <button (click)="onAuthSubmit()" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 16px;">
+      {{ isLoginMode ? 'Login' : 'Register' }}
+    </button>
+
+    <p style="margin-top: 15px; text-align: center;">
+      <a href="#" (click)="isLoginMode = !isLoginMode; $event.preventDefault()" style="color: #007bff;">
+        {{ isLoginMode ? 'Need an account? Register here' : 'Have an account? Login here' }}
+      </a>
+    </p>
+  </div>
+
+  <!-- MAIN INVENTORY DASHBOARD (Only shown when authenticated) -->
+  <div *ngIf="isAuthenticated">
+    
+    <!-- Header with Logout -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h1 class="mb-0">📦 Inventory System</h1>
+      <button (click)="logout()" class="btn btn-secondary">
+        Logout
+      </button>
+    </div>
+
+  <!-- Low Stock Alert -->
+  <div *ngIf="lowStockCount > 0" 
+       style="background-color: #fff3cd; color: #856404; padding: 15px; border: 1px solid #ffeeba; border-radius: 5px; margin-bottom: 20px;">
+    <strong>⚠️ Attention Needed:</strong> You have {{ lowStockCount }} product(s) running low on inventory.
+  </div>
+
+  <!-- Search Bar -->
+  <div style="margin-bottom: 20px;">
+    <input 
+      type="text" 
+      class="form-control"
+      [(ngModel)]="searchQuery" 
+      (keyup)="onSearch()" 
+      placeholder=" Search for an item..." 
+      style="padding: 10px; width: 100%; border: 1px solid #ccc; border-radius: 4px;"
+    />
+  </div>
 
   <div class="card p-4 mb-4 shadow-sm">
     <h4>Add New Product</h4>
     <div class="row g-2">
-      <div class="col-md-5">
-        <input type="text" class="form-control" placeholder="Item Name (e.g. Laptop)" [(ngModel)]="newItemName">
+      <div class="col-md-4">
+        <input type="text" class="form-control" placeholder="Item Name (e.g. Laptop)" [(ngModel)]="newItem.name">
       </div>
       <div class="col-md-2">
-        <input type="number" class="form-control" placeholder="Qty" [(ngModel)]="newItemQty">
+        <input type="number" class="form-control" placeholder="Qty" [(ngModel)]="newItem.quantity">
       </div>
       <div class="col-md-2">
-        <input type="number" class="form-control" placeholder="Alert Limit" [(ngModel)]="newItemThreshold">
+        <input type="number" class="form-control" placeholder="Price (₹)" [(ngModel)]="newItem.price">
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
+        <input type="number" class="form-control" placeholder="Alert Limit" [(ngModel)]="newItem.lowStockThreshold">
+      </div>
+      <div class="col-md-2">
         <button class="btn btn-primary w-100" (click)="addNewItem()">+ Add Item</button>
       </div>
     </div>
@@ -25,6 +131,7 @@
         <th>ID</th>
         <th>Product Name</th>
         <th>Stock Level</th>
+        <th>Price</th>
         <th>Status</th>
         <th>Actions</th>
       </tr>
@@ -38,17 +145,65 @@
           {{ item.quantity }}
         </td>
 
+        <td>₹{{ item.price }}</td>
+
         <td>
-          <span *ngIf="item.quantity <= item.lowStockThreshold" class="badge bg-danger"> LOW STOCK</span>
-          <span *ngIf="item.quantity > item.lowStockThreshold" class="badge bg-success">OK</span>
+          <span *ngIf="item.quantity === 0" style="color: red; font-weight: bold;">
+            ❌ Out of Stock
+          </span>
+
+          <span *ngIf="item.quantity > 0 && item.quantity < 5" style="color: orange; font-weight: bold;">
+            ⚠️ Low Stock
+          </span>
+
+          <span *ngIf="item.quantity >= 5" style="color: green; font-weight: bold;">
+            ✅ In Stock
+          </span>
         </td>
 
         <td>
           <button class="btn btn-sm btn-success me-2" (click)="updateStock(item.id, 1)">+</button>
           <button class="btn btn-sm btn-danger me-2" (click)="updateStock(item.id, -1)">-</button>
           <button class="btn btn-sm btn-outline-danger" (click)="deleteItem(item.id)" title="Delete Item">🗑️</button>
+          <button class="btn btn-sm btn-info ms-2" (click)="viewHistory(item)" title="View History"> History</button>
         </td>
       </tr>
     </tbody>
   </table>
+
+  <!-- Transaction History Section -->
+  <div id="history-section" *ngIf="selectedHistory.length > 0" style="margin-top: 40px; border-top: 2px solid #ccc; padding-top: 20px;">
+    
+    <h2> Transaction History: {{ selectedItemName }}</h2>
+    
+    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+      <thead>
+        <tr style="background-color: #f8f9fa; text-align: left;">
+          <th style="padding: 10px; border-bottom: 2px solid #ddd;">Date</th>
+          <th style="padding: 10px; border-bottom: 2px solid #ddd;">Type</th>
+          <th style="padding: 10px; border-bottom: 2px solid #ddd;">Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let record of selectedHistory">
+          <td style="padding: 10px; border-bottom: 1px solid #ddd;">
+            {{ record.transactionDate | date:'medium' }}
+          </td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd;">
+            <span [style.color]="record.transactionType === 'Restock' ? 'green' : 'red'">
+              {{ record.transactionType }}
+            </span>
+          </td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">
+            {{ record.quantityChanged > 0 ? '+' : '' }}{{ record.quantityChanged }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button class="btn btn-secondary mt-3" (click)="selectedHistory = []">Close History</button>
+  </div>
+
+  </div> <!-- End of isAuthenticated -->
+
 </div>

@@ -33,9 +33,29 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<InventoryDbContext>()
     .AddDefaultTokenProviders();
 
-// 1.2 Get the Key from appsettings.json
+// 1.2 Get the Key from appsettings.json or Azure configuration
 var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
+var jwtKey = jwtSettings["Key"];
+
+// Defensive check: If JWT Key is missing, log error and use a fallback (for debugging)
+if (string.IsNullOrEmpty(jwtKey))
+{
+    Console.WriteLine("WARNING: JWT Key not found in configuration! Using hardcoded key for debugging.");
+    jwtKey = "ThisIsMySuperSecretKeyForMyInventoryApp123!";
+}
+
+var key = Encoding.ASCII.GetBytes(jwtKey);
+
+// Get Issuer and Audience with fallbacks
+var jwtIssuer = jwtSettings["Issuer"];
+var jwtAudience = jwtSettings["Audience"];
+
+if (string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtAudience))
+{
+    Console.WriteLine("WARNING: JWT Issuer/Audience not found! Using Azure URL.");
+    jwtIssuer = jwtIssuer ?? "https://inventory-api-konark.azurewebsites.net";
+    jwtAudience = jwtAudience ?? "https://inventory-api-konark.azurewebsites.net";
+}
 
 // 1.3 Configure JWT Authentication
 builder.Services.AddAuthentication(options =>
@@ -51,8 +71,8 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
 });
@@ -107,20 +127,38 @@ var app = builder.Build();
 // Auto-apply migrations in Azure
 if (inAzure)
 {
+    Console.WriteLine("Running in Azure - Attempting to apply migrations...");
     using (var scope = app.Services.CreateScope())
     {
         try
         {
             var db = scope.ServiceProvider.GetRequiredService<InventoryDbContext>();
-            db.Database.Migrate(); // Apply pending migrations automatically
+            Console.WriteLine("Database context created. Testing connection...");
+            
+            if (db.Database.CanConnect())
+            {
+                Console.WriteLine("Database connection successful! Applying migrations...");
+                db.Database.Migrate();
+                Console.WriteLine("Migrations applied successfully!");
+            }
+            else
+            {
+                Console.WriteLine("ERROR: Cannot connect to database!");
+            }
         }
         catch (Exception ex)
         {
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
             logger.LogError(ex, "An error occurred while migrating the database.");
-            throw; // Re-throw to see the actual error in Azure logs
+            Console.WriteLine($"ERROR during migration: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            // Don't throw - let the app start so we can see errors in browser
         }
     }
+}
+else
+{
+    Console.WriteLine("Running locally - skipping Azure migrations.");
 }
 
 // Configure the HTTP request pipeline.

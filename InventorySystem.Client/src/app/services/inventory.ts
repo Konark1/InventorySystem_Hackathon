@@ -8,6 +8,7 @@ export interface InventoryItem {
   name: string;
   quantity: number;
   lowStockThreshold: number;
+  price: number;
 }
 
 @Injectable({
@@ -15,13 +16,13 @@ export interface InventoryItem {
 })
 export class InventoryService {
   //PORT IS HERE:
-  private apiUrl = 'https://inventorysystemhackathon-production.up.railway.app/api/inventory';
+  private apiUrl = 'https://inventory-api-konark-eac8bhaxg6hxhaec.centralindia-01.azurewebsites.net/api/inventory';
 
   constructor(private http: HttpClient) { }
 
-  // 1. Get All Items
-  getItems(): Observable<InventoryItem[]> {
-    return this.http.get<InventoryItem[]>(this.apiUrl);
+  // 1. Get All Items (with optional search)
+  getItems(search: string = ''): Observable<InventoryItem[]> {
+    return this.http.get<InventoryItem[]>(`${this.apiUrl}?search=${search}`);
   }
 
   // 2. Add New Item
@@ -38,4 +39,16 @@ export class InventoryService {
   deleteItem(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
+
+  // 5. Get Item History
+  getItemHistory(id: number): Observable<InventoryTransaction[]> {
+    return this.http.get<InventoryTransaction[]>(`${this.apiUrl}/${id}/history`);
+  }
+}
+
+export interface InventoryTransaction {
+  id: number;
+  quantityChanged: number;
+  transactionType: string;
+  transactionDate: string;
 }
